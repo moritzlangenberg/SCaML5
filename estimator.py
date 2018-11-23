@@ -30,7 +30,7 @@ def setNumberOfObservations():
 
 
 def mean(k):
-    meanX = [0] * D   # sum of all obervations labled with class k
+    meanX = np.zeros(D)   # sum of all obervations labled with class k
     observationIterator = 0 #start at first observation
 
     if k == 0:
@@ -69,8 +69,11 @@ def pooledDiagonalCovariance():
 
 
 ################EXERCISE 4#######################
+######numpy is not used because not explained anywhere in exercise and we are new to python
+
+
 def classSpecificDiagonalCovariance():
-    varianceX = [[0] * D] * K
+    varianceX = np.zeros((D, K))
     classCount = [0] * K
     for observationIterator in range(0, numberOfAllObservations):
         currentClass = int(data[observationIterator * 257 + 2])
@@ -89,7 +92,7 @@ def classSpecificDiagonalCovariance():
     return varianceX
 
 def pooledFullCovariance():
-    covarianceMatrix = [[0] * D] * D
+    covarianceMatrix = np.zeros((D, D))
     for observationIterator in range(0, numberOfAllObservations):
         currentClass = int(data[observationIterator * 257 + 2])
         if currentClass == 10:
@@ -103,18 +106,20 @@ def pooledFullCovariance():
                 tempMean2 = means[currentClass][secondElementIterator]
                 covarianceMatrix[elementIterator][secondElementIterator] += (tempX - tempMean)*(tempX2 - tempMean2)
 
-    for x in range(0,D):
-        for y in range(0,D):
-            covarianceMatrix[x][y] = np.divide(covarianceMatrix[x][y], numberOfAllObservations)
+   # for x in range(0,D):
+    #    for y in range(0,D):
+     #       covarianceMatrix[x][y] = np.divide(covarianceMatrix[x][y], numberOfAllObservations)
 
-    return covarianceMatrix
+    return covarianceMatrix * (np.divide(1, numberOfAllObservations))
 
 def classSpecificFullCovariance():
-    covarianceMatrix = [[0] * D] * D
+    covarianceMatrix = np.zeros((D, D, K))
+    classCount = np.zeros(K)
     for observationIterator in range(0, numberOfAllObservations):
         currentClass = int(data[observationIterator * 257 + 2])
         if currentClass == 10:
             currentClass = 0
+        classCount[currentClass] += 1
         currentObservation = observationIterator * 257 + 3
         for elementIterator in range(0, D):
             tempX = int(data[currentObservation + elementIterator])
@@ -122,33 +127,14 @@ def classSpecificFullCovariance():
             for secondElementIterator in range(0, D):
                 tempX2 = int(data[currentObservation + secondElementIterator])
                 tempMean2 = means[currentClass][secondElementIterator]
-                covarianceMatrix[elementIterator][secondElementIterator] += (tempX - tempMean)*(tempX2 - tempMean2)
+                covarianceMatrix[elementIterator][secondElementIterator][currentClass] += (tempX - tempMean)*(tempX2 - tempMean2)
 
     for x in range(0,D):
         for y in range(0,D):
-            covarianceMatrix[x][y] = np.divide(covarianceMatrix[x][y], numberOfAllObservations)
+            for k in range(0,K):
+                covarianceMatrix[x][y][k] = np.divide(covarianceMatrix[x][y][k], classCount[k])
 
     return covarianceMatrix
-
-
-echo "# SCaML" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git remote add origin https://github.com/moritzlangenberg/SCaML.git
-git push -u origin master
-
-
-
-
-
-
-
-
-
-
-
-
 
 ##################################################
 def p(k):
@@ -164,7 +150,7 @@ for k in range(0, K):   #calculate the means
     means[k] = mean(k)
 
 #############OUTPUT TO PARAMETER#################
-out = open("usps d.param", "w")
+"""out = open("usps d.param", "w")
 
 
 out.write("d \n")
@@ -173,19 +159,115 @@ out.write("\n")
 out.write((str(D)))
 out.write("\n")
 
-for k in range(0,K):
+for k in range(0, K):
+    out.write(str(k))
+    out.write("\n")
+    out.write(str(p(k)))
+    out.write("\n")
+    for m in means[k]:
+        out.write(str(round(m, 1)))
+        out.write("\t")
+    out.write("\n")
+    for v in pooledDiagonalCovariance():
+        out.write(str(v))
+        out.write("\t")
+    out.write("\n")
+out.close()
+"""
+
+pd = pooledDiagonalCovariance()
+pf = pooledFullCovariance()
+cd = classSpecificDiagonalCovariance()
+cf = classSpecificFullCovariance()
+
+out = open("usps_pd.param", "w")
+out.write("d \n")
+out.write(str(K))
+out.write("\n")
+out.write((str(D)))
+out.write("\n")
+for k in range(0, K):
     out.write(str(k))
     out.write("\n")
     out.write(str(p(k)))
     out.write("\n")
     for m in means[k]:
         out.write(str(m))
-        out.write(" ")
+        out.write("\t")
     out.write("\n")
-
-    for v in pooledDiagonalCovariance():
+    for v in pd:
         out.write(str(v))
-        out.write(" ")
+        out.write("\t")
     out.write("\n")
 out.close()
+
+
+out = open("usps_pf.param", "w")
+out.write("f \n")
+out.write(str(K))
+out.write("\n")
+out.write((str(D)))
+out.write("\n")
+for k in range(0, K):
+    out.write(str(k))
+    out.write("\n")
+    out.write(str(p(k)))
+    out.write("\n")
+    for m in means[k]:
+        out.write(str(m))
+        out.write("\t")
+    out.write("\n")
+    for x in range(0, D):
+        for y in range(0, D):
+            out.write(str(pd[x][y]))
+            out.write("\t")
+        out.write("\n")
+    out.write("\n")
+out.close()
+
+out = open("usps_cf.param", "w")
+out.write("f \n")
+out.write(str(K))
+out.write("\n")
+out.write((str(D)))
+out.write("\n")
+for k in range(0, K):
+    out.write(str(k))
+    out.write("\n")
+    out.write(str(p(k)))
+    out.write("\n")
+    for m in means[k]:
+        out.write(str(m))
+        out.write("\t")
+    out.write("\n")
+    for y in range(0, D):
+        for x in range(0, D):
+            out.write(str(cf[x][y][k]))
+            out.write("\t")
+        out.write("\n")
+    out.write("\n")
+out.close()
+
+out = open("usps_cd.param", "w")
+out.write("d \n")
+out.write(str(K))
+out.write("\n")
+out.write((str(D)))
+out.write("\n")
+for k in range(0, K):
+    out.write(str(k))
+    out.write("\n")
+    out.write(str(p(k)))
+    out.write("\n")
+    for m in means[k]:
+        out.write(str(m))
+        out.write("\t")
+    out.write("\n")
+    for y in range(0, D):
+        out.write(str(cd[y][k]))
+        out.write("\t")
+    out.write("\n")
+out.close()
+
+
 
