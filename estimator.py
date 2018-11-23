@@ -175,11 +175,12 @@ for k in range(0, K):
 out.close()
 """
 
-pd = pooledDiagonalCovariance()
-pf = pooledFullCovariance()
-cd = classSpecificDiagonalCovariance()
+#pd = pooledDiagonalCovariance()
+#pf = pooledFullCovariance()
+#cd = classSpecificDiagonalCovariance()
 cf = classSpecificFullCovariance()
 
+""""WORKS
 out = open("usps_pd.param", "w")
 out.write("d \n")
 out.write(str(K))
@@ -219,11 +220,35 @@ for k in range(0, K):
     out.write("\n")
     for x in range(0, D):
         for y in range(0, D):
-            out.write(str(pd[x][y]))
+            out.write(str(pf[x][y]))
             out.write("\t")
         out.write("\n")
     out.write("\n")
 out.close()
+
+
+out = open("usps_cd.param", "w")
+out.write("d \n")
+out.write(str(K))
+out.write("\n")
+out.write((str(D)))
+out.write("\n")
+for k in range(0, K):
+    out.write(str(k))
+    out.write("\n")
+    out.write(str(p(k)))
+    out.write("\n")
+    for m in means[k]:
+        out.write(str(m))
+        out.write("\t")
+    out.write("\n")
+    for y in range(0, D):
+        out.write(str(cd[y][k]))
+        out.write("\t")
+    out.write("\n")
+out.close()
+
+"""
 
 out = open("usps_cf.param", "w")
 out.write("f \n")
@@ -247,27 +272,5 @@ for k in range(0, K):
         out.write("\n")
     out.write("\n")
 out.close()
-
-out = open("usps_cd.param", "w")
-out.write("d \n")
-out.write(str(K))
-out.write("\n")
-out.write((str(D)))
-out.write("\n")
-for k in range(0, K):
-    out.write(str(k))
-    out.write("\n")
-    out.write(str(p(k)))
-    out.write("\n")
-    for m in means[k]:
-        out.write(str(m))
-        out.write("\t")
-    out.write("\n")
-    for y in range(0, D):
-        out.write(str(cd[y][k]))
-        out.write("\t")
-    out.write("\n")
-out.close()
-
 
 
