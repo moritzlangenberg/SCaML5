@@ -94,13 +94,6 @@ def classifyPD(n):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
-        #currentClassProbability = np.transpose((getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.dot(currentClassProbability, np.linalg.inv(getPD()))
-        #currentClassProbability = np.dot(currentClassProbability, (getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.exp(-0.5*currentClassProbability)
-        #currentClassProbability *= p[k]
-        #noew we put stuff above together
-        #curr = (-0.5* (np.dot((getObservationVector(n)-getMean(getObservationClass(n))), np.linalg.inv(getPD())) * (getObservationVector(n)-getMean(getObservationClass(n))).T))
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
@@ -116,13 +109,6 @@ def classifyPF(n, l):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
-        #currentClassProbability = np.transpose((getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.dot(currentClassProbability, np.linalg.inv(getPD()))
-        #currentClassProbability = np.dot(currentClassProbability, (getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.exp(-0.5*currentClassProbability)
-        #currentClassProbability *= p[k]
-        #noew we put stuff above together
-        #curr = (-0.5* (np.dot((getObservationVector(n)-getMean(getObservationClass(n))), np.linalg.inv(getPD())) * (getObservationVector(n)-getMean(getObservationClass(n))).T))
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
@@ -138,13 +124,6 @@ def classifyCD(n):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
-        #currentClassProbability = np.transpose((getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.dot(currentClassProbability, np.linalg.inv(getPD()))
-        #currentClassProbability = np.dot(currentClassProbability, (getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.exp(-0.5*currentClassProbability)
-        #currentClassProbability *= p[k]
-        #noew we put stuff above together
-        #curr = (-0.5* (np.dot((getObservationVector(n)-getMean(getObservationClass(n))), np.linalg.inv(getPD())) * (getObservationVector(n)-getMean(getObservationClass(n))).T))
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
@@ -160,13 +139,6 @@ def classifyCF(n, l):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
-        #currentClassProbability = np.transpose((getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.dot(currentClassProbability, np.linalg.inv(getPD()))
-        #currentClassProbability = np.dot(currentClassProbability, (getObservationVector(n)-getMean(getObservationClass(n))))
-        #currentClassProbability = np.exp(-0.5*currentClassProbability)
-        #currentClassProbability *= p[k]
-        #noew we put stuff above together
-        #curr = (-0.5* (np.dot((getObservationVector(n)-getMean(getObservationClass(n))), np.linalg.inv(getPD())) * (getObservationVector(n)-getMean(getObservationClass(n))).T))
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
@@ -191,13 +163,14 @@ def main():
     #print((np.array([getObservationVector(1)-getMean(getObservationClass(1))]).T) @ (np.array([getObservationVector(1)-getMean(getObservationClass(1))]).T))
     #print(getObservationVector(1) - getMean(getObservationClass(1)) @ (np.array([getObservationVector(1) - getMean(getObservationClass(1))]).T))
     #print(np.dot((getObservationVector(1)-getMean(getObservationClass(1))), (getObservationVector(1)-getMean(getObservationClass(1))).T))
-    print(np.sum((np.dot(getObservationVector(1)-getMean(getObservationClass(1)), np.linalg.inv(getPD()))) * (getObservationVector(1)-getMean(getObservationClass(1)))))
+    #print(np.sum((np.dot(getObservationVector(1)-getMean(getObservationClass(1)), np.linalg.inv(getPD()))) * (getObservationVector(1)-getMean(getObservationClass(1)))))
     #print(np.sum((np.dot(getObservationVector(n) - getMean(getObservationClass(n)), np.linalg.inv(getPD()))) * (getObservationVector(n) - getMean(getObservationClass(n)))))
     #print((getObservationVector(1) - getMean(getObservationClass(1))) * (getObservationVector(1) - getMean(getObservationClass(1))))
+    
     numberOfEvents = int(np.divide(len(test) - 2, D + 1))
     numberOfWrongClassificationsCF = [0] * len(lamda)
     numberOfWrongClassificationsCD = [0] * len(lamda)
-    numberOfWrongClassificationsPF = 0
+    numberOfWrongClassificationsPF = [0] * len(lamda)
     numberOfWrongClassificationsPD = 0
 
     for n in range(0, numberOfEvents):
@@ -205,22 +178,26 @@ def main():
         if realClass == 10:
             realClass = 0
         assignedClassPD = classifyPD(n)
-        assignedClassCD = classifyCD(n)
+        #assignedClassCD = classifyCD(n)
+        assignedClassCD = 0
         assignedClassPF = [classifyPF(n, l) for l in lamda]
-        assignedClassCF = [classifyCF(n, l) for l in lamda]
+        #assignedClassCF = [classifyCF(n, l) for l in lamda]
+        assignedClassCF = 0
 
-      #  M[realClass * 10 + assignedClassPD] += 1
         if assignedClassPD != realClass:
             numberOfWrongClassificationsPD += 1
 
-        if assignedClassCF != realClass:
-            numberOfWrongClassificationsCF += 1
+       # for i in range(0, len(lamda)):
+        #    if assignedClassCF[i] != realClass:
+         #       numberOfWrongClassificationsCF[i] += 1
 
-        if assignedClassCD != realClass:
-            numberOfWrongClassificationsCD += 1
+       # for i in range(0, len(lamda)):
+        #    if assignedClassCD[i] != realClass:
+         #       numberOfWrongClassificationsCD[i] += 1
+        for i in range(0, len(lamda)):
 
-        if assignedClassPF != realClass:
-            numberOfWrongClassificationsPF += 1
+            if assignedClassPF[i] != realClass:
+                 numberOfWrongClassificationsPF[i] += 1
 
 
     ##ERRORFILE ORDER
@@ -231,16 +208,16 @@ def main():
     errorRateFile = open("usps_d.error", "w")
     errorRateFile.write(str(np.divide(numberOfWrongClassificationsPD, numberOfEvents)))
     errorRateFile.write("\n")
-    errorRateFile.write(str(np.divide(numberOfWrongClassificationsCD, numberOfEvents)))
-    errorRateFile.write("\n")
-    for l in lamda:
+    #errorRateFile.write(str(np.divide(numberOfWrongClassificationsCD, numberOfEvents)))
+    #errorRateFile.write("\n")
+    for l in range(0, len(lamda)):
         errorRateFile.write(str(np.divide(numberOfWrongClassificationsPF[l], numberOfEvents)))
         errorRateFile.write("\t")
     errorRateFile.write("\n")
-    for l in lamda:
-        errorRateFile.write(str(np.divide(numberOfWrongClassificationsCF[l], numberOfEvents)))
-        errorRateFile.write("\t")
-    errorRateFile.write("\n")
+    #for l in lamda:
+    #    errorRateFile.write(str(np.divide(numberOfWrongClassificationsCF[l], numberOfEvents)))
+    #    errorRateFile.write("\t")
+    #errorRateFile.write("\n")
 
     errorRateFile.close()
 
