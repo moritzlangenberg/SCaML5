@@ -73,6 +73,7 @@ def getCF(k):
 #print(getMean(1))
 #print(getCF(0))
 #print(getPF())
+#print(getCD(1))
 
 K = int(parameterPD[1])
 D = int(parameterPD[2])
@@ -84,7 +85,7 @@ ClassSpecificFullCovariance = np.array(float(parameterCF[256 + 5 + i]) for i in 
 
 #M = [[0]*K]*K
 M = [0] * (K * K)
-lamda = [1, 0.5, 0.01, 0.001, 0.0001, 0.00001, 0.000001]
+lamda = [1, 0.5, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001]
 
 #def meanElement(k, d):
  #   return float(parameter[k * (2 * D + 2) +5 + d])
@@ -105,14 +106,14 @@ def classifyPD(n):
             choosenClass = k
     return choosenClass
 
-def classifyPF(n, l):
+def classifyPF(n):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
-                                                    np.linalg.inv(l * getPD() + (1 - l) * getPF())))
+                                                    np.linalg.inv(getPF())))
                                                     * (getObservationVector(n) - getMean(k))))
         #check if smaller then choosenClass
         if currentClassProbability > choosenClassProbability:   #distance smaller!
@@ -120,14 +121,14 @@ def classifyPF(n, l):
             choosenClass = k
     return choosenClass
 
-def classifyCD(n):
+def classifyCD(n, l):
     choosenClass = 0
     choosenClassProbability = 0
     for k in range(0, K):
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
-                                                     np.linalg.inv(getCD(k))))
+                                                     np.linalg.inv((l * getPD()) + ((1-l) * getCD(k)))))
                                                     * (getObservationVector(n) - getMean(k))))
         #check if smaller then choosenClass
         if currentClassProbability > choosenClassProbability:   #distance smaller!
@@ -142,7 +143,7 @@ def classifyCF(n, l):
         currentClassProbability = p[k] * np.exp(-0.5 *
                                                 np.sum(
                                                     (np.dot(getObservationVector(n) - getMean(k),
-                                                    np.linalg.inv(l * getCF(k) + (1-l)*getCD())))
+                                                    np.linalg.inv((l * getPF()) + ((1-l)*getCF(k)))))
                                                     * (getObservationVector(n) - getMean(k))))
         #check if smaller then choosenClass
         if currentClassProbability > choosenClassProbability:   #distance smaller!
@@ -166,11 +167,13 @@ def main():
     #print(np.sum((np.dot(getObservationVector(1)-getMean(getObservationClass(1)), np.linalg.inv(getPD()))) * (getObservationVector(1)-getMean(getObservationClass(1)))))
     #print(np.sum((np.dot(getObservationVector(n) - getMean(getObservationClass(n)), np.linalg.inv(getPD()))) * (getObservationVector(n) - getMean(getObservationClass(n)))))
     #print((getObservationVector(1) - getMean(getObservationClass(1))) * (getObservationVector(1) - getMean(getObservationClass(1))))
-    
+    #print((0.5 * getPD()) + ((1-0.5) * getCD(1)))
+    print(getCD(0))
+
     numberOfEvents = int(np.divide(len(test) - 2, D + 1))
     numberOfWrongClassificationsCF = [0] * len(lamda)
     numberOfWrongClassificationsCD = [0] * len(lamda)
-    numberOfWrongClassificationsPF = [0] * len(lamda)
+    numberOfWrongClassificationsPF = 0
     numberOfWrongClassificationsPD = 0
 
     for n in range(0, numberOfEvents):
@@ -178,47 +181,45 @@ def main():
         if realClass == 10:
             realClass = 0
         assignedClassPD = classifyPD(n)
-        #assignedClassCD = classifyCD(n)
-        assignedClassCD = 0
-        assignedClassPF = [classifyPF(n, l) for l in lamda]
-        #assignedClassCF = [classifyCF(n, l) for l in lamda]
-        assignedClassCF = 0
+        assignedClassPF = classifyPF(n)
+        assignedClassCD = [classifyCD(n, l) for l in lamda]
+        assignedClassCF = [classifyCF(n, l) for l in lamda]
 
         if assignedClassPD != realClass:
             numberOfWrongClassificationsPD += 1
 
-       # for i in range(0, len(lamda)):
-        #    if assignedClassCF[i] != realClass:
-         #       numberOfWrongClassificationsCF[i] += 1
+        if assignedClassPF != realClass:
+            numberOfWrongClassificationsPF += 1
 
-       # for i in range(0, len(lamda)):
-        #    if assignedClassCD[i] != realClass:
-         #       numberOfWrongClassificationsCD[i] += 1
         for i in range(0, len(lamda)):
+            if assignedClassCF[i] != realClass:
+                numberOfWrongClassificationsCF[i] += 1
 
-            if assignedClassPF[i] != realClass:
-                 numberOfWrongClassificationsPF[i] += 1
+        for i in range(0, len(lamda)):
+            if assignedClassCD[i] != realClass:
+                numberOfWrongClassificationsCD[i] += 1
+
+
 
 
     ##ERRORFILE ORDER
     #PD
-    #CD
-    #PF all lamdas
+    #PF
+    #CD all lamdas
     #CF all lamdas
     errorRateFile = open("usps_d.error", "w")
     errorRateFile.write(str(np.divide(numberOfWrongClassificationsPD, numberOfEvents)))
     errorRateFile.write("\n")
-    #errorRateFile.write(str(np.divide(numberOfWrongClassificationsCD, numberOfEvents)))
-    #errorRateFile.write("\n")
+    errorRateFile.write(str(np.divide(numberOfWrongClassificationsPF, numberOfEvents)))
+    errorRateFile.write("\n")
     for l in range(0, len(lamda)):
-        errorRateFile.write(str(np.divide(numberOfWrongClassificationsPF[l], numberOfEvents)))
+        errorRateFile.write(str(np.divide(numberOfWrongClassificationsCD[l], numberOfEvents)))
         errorRateFile.write("\t")
     errorRateFile.write("\n")
-    #for l in lamda:
-    #    errorRateFile.write(str(np.divide(numberOfWrongClassificationsCF[l], numberOfEvents)))
-    #    errorRateFile.write("\t")
-    #errorRateFile.write("\n")
-
+    for l in range(0, len(lamda)):
+        errorRateFile.write(str(np.divide(numberOfWrongClassificationsCF[l], numberOfEvents)))
+        errorRateFile.write("\t")
+    errorRateFile.write("\n")
     errorRateFile.close()
 
 def writeConfusionMatrix():

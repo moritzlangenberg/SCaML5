@@ -177,8 +177,8 @@ out.close()
 
 #pd = pooledDiagonalCovariance()
 #pf = pooledFullCovariance()
-#cd = classSpecificDiagonalCovariance()
-cf = classSpecificFullCovariance()
+cd = classSpecificDiagonalCovariance()
+#cf = classSpecificFullCovariance()
 
 """"WORKS
 out = open("usps_pd.param", "w")
@@ -226,7 +226,7 @@ for k in range(0, K):
     out.write("\n")
 out.close()
 
-
+"""
 out = open("usps_cd.param", "w")
 out.write("d \n")
 out.write(str(K))
@@ -273,4 +273,4 @@ for k in range(0, K):
     out.write("\n")
 out.close()
 
-
+"""
