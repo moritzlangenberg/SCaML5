@@ -168,7 +168,7 @@ def main():
     #print(np.sum((np.dot(getObservationVector(n) - getMean(getObservationClass(n)), np.linalg.inv(getPD()))) * (getObservationVector(n) - getMean(getObservationClass(n)))))
     #print((getObservationVector(1) - getMean(getObservationClass(1))) * (getObservationVector(1) - getMean(getObservationClass(1))))
     #print((0.5 * getPD()) + ((1-0.5) * getCD(1)))
-    print(getCD(0))
+    #print(getCD(0))
 
     numberOfEvents = int(np.divide(len(test) - 2, D + 1))
     numberOfWrongClassificationsCF = [0] * len(lamda)

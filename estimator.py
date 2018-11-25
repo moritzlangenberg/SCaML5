@@ -87,7 +87,7 @@ def classSpecificDiagonalCovariance():
             varianceX[elementIterator][currentClass] += (tempX - tempMean)**2
 
     for k in range(0, K):
-        for x in range(0, K):
+        for x in range(0, D):
             varianceX[x][k] = np.divide(varianceX[x][k], classCount[k])
     return varianceX
 
